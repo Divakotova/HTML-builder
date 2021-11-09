@@ -7,7 +7,7 @@ async function createDirectory(directory) {
 }
 
 async function copyDirectory(folder, folderCopy) {
-    await fsPromises.rmdir(folderCopy, { recursive: true });
+    await fsPromises.rm(folderCopy, {force:true, recursive: true });
     await fsPromises.mkdir(folderCopy, { recursive: true });
     const files = await fsPromises.readdir(folder, {withFileTypes: true})
     files.forEach (async (file) => {
@@ -19,27 +19,14 @@ async function copyDirectory(folder, folderCopy) {
          await fsPromises.copyFile(baseFile, copyFile)  
         }
     })
-    // .then(  files.forEach (async (file) => {
-    //         const baseFile = path.join(folder, `${file.name}`)
-    //         const copyFile = path.join(folderCopy, `${file.name}`)
-    //         if (!filename.isFile()) {
-    //             copyDirectory(baseFile, copyFile)
-    //         } else {
-    //          await fsPromises.copyFile(baseFile, copyFile)  
-    //         }
-    //     })
-    // )
-    // .catch(error => {
-    //     console.log(error)
-    // })
 }
+const styleCss = fs.createWriteStream(path.join(__dirname, 'project-dist','style.css'))
 
 async function mergeStyles() {
    await fsPromises.readdir(path.join(__dirname, 'styles'), {withFileTypes: true})
-.then(filenames => {
-    for (let filename of filenames) {
+.then(async (filenames) => {
+    for await (let filename of filenames) {
         const readFile = fs.createReadStream(path.join(__dirname, 'styles', `${filename.name}`))
-        const styleCss = fs.createWriteStream(path.join(__dirname, 'project-dist','style.css'))
         if (filename.isFile() && filename.name.includes('.css')) {
             readFile.on('data', (data) => styleCss.write(data))
      } 
